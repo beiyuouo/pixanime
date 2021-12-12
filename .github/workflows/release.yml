@@ -1,0 +1,33 @@
+name: Continuous Delivery
+on:
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "**/README.md"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checking build
+        uses: actions/checkout@v2
+
+      - name: Package Application
+        uses: JackMcKew/pyinstaller-action-windows@main
+        with:
+          path: .
+      - run: ls dist/windows
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Building deployment artifact
+        uses: actions/checkout@v2
+
+      - name: Create Draft Release
+        id: draft_release
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
